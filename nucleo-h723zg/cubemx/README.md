@@ -1,5 +1,7 @@
 # Mongoose CubeMX integration
 
+## Generating Cmake-based VSCode project
+
 1. Open the .ioc file in your CubeMX
 2. Click on "Project Manager", select "Cmake" as toolchain/IDE, click "Generate Code" on the right top. It will populate this directory with the generated project code.
 3. Open this directory in Vscode. Make sure you have STM32 Cube extension installed
