@@ -11,7 +11,9 @@ BOARD-NAME/
           cubemx/     <--- CubeMX: Vscode or CubeIDE
 ```
 
-All projects demonstrates the same core functionality: a professional Web UI dashboard with LED control and  OTA firmware update. The functionality is identical and built using the Mongoose Visual [Web UI Builder](https://mongoose.ws/wizard/) . It is easy to customise the dashboard for your production firmware - just load the `desktop/mongoose/mongoose_wizard.json` in the Web UI builder and start altering it. No frontend or network programming skills are required.
+All projects implement the same core functionality: a professional Web UI dashboard with LED control and OTA firmware update. The functionality is identical across all variants and is built using the [Web UI Builder](https://mongoose.ws/wizard/). To customize the dashboard for your production firmware, open `desktop/mongoose/mongoose_wizard.json` in the Web UI Builder, make the required changes, and regenerate the firmware.
+
+No frontend or networking expertise is required.
 
 <div align="center">
   <img src="screenshot.webp" alt="Mongoose Wizard dashboard" width="75%"/>
