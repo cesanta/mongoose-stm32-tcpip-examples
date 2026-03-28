@@ -58,17 +58,25 @@ void my_set_leds(struct leds *data) {
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, data->led2);
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, data->led3);
 }
+
+// This blocks forever. Call it at the end of main(), or in a
+// separate RTOS task. Give that task 8k stack space.
+void run_mongoose(void) {
+  mongoose_init();
+  mongoose_set_http_handlers("leds", my_get_leds, my_set_leds);
+  for (;;) {
+    mongoose_poll();
+  }
+}
 /* USER CODE END 0 */
 ```
 
 Inside the `main()` function:
 ```c
 /* USER CODE BEGIN WHILE */
-mongoose_init();
-mongoose_set_http_handlers("leds", my_get_leds, my_set_leds);
+run_mongoose();  // <----------------- Add this line
 while (1)
 {
-  mongoose_poll();
   /* USER CODE END WHILE */
 ```
 7. Start serial console, build, flash, look at the IP address in the logs, enter it in your browser - and you have the web dashboard running!
