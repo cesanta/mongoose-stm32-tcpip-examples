@@ -11,7 +11,7 @@ BOARD-NAME/
           cubemx/     <--- CubeMX: Vscode or CubeIDE
 ```
 
-Each project demonstrates the same core functionality: a professional Web UI dashboard with LED control and  OTA firmware update
+All projects demonstrates the same core functionality: a professional Web UI dashboard with LED control and  OTA firmware update. The functionality is identical and built using the Mongoose Visual [Web UI Builder](https://mongoose.ws/wizard/) . It is easy to customise the dashboard for your production firmware - just load the `desktop/mongoose/mongoose_wizard.json` in the Web UI builder and start altering it. No frontend or network programming skills are required.
 
 <div align="center">
   <img src="screenshot.webp" alt="Mongoose Wizard dashboard" width="75%"/>
@@ -25,8 +25,4 @@ these projects on your workstation, [set up your build environment](https://mong
 The `cubemx` project provides STM32CubeMX-based setup. It includes a `.ioc` configuration file, and comes with integration instructions in README.md . Workflow:
 1. Open the `.ioc` file in STM32CubeMX  
 2. Generate a project (VS Code, CubeIDE, or any IDE)  
-3. Follow the README to integrate Mongoose  
-
-
-All projects functionality is identical and built using the Mongoose Visual [Web UI Builder](https://mongoose.ws/wizard/) . It is easy to alter its functionality and build a production firmware - just load the `mongoose/mongoose_wizard.json` in the Web UI builder
-and start altering it. No frontend or network programming skills are required.
+3. Follow the README to integrate Mongoose
