@@ -58,3 +58,15 @@ The functionality is identical across all projects and is built using the [Web U
 6. Done - rebuild your embedded project to apply the updated UI  
 
 Note - no frontend or networking expertise is required. See [Mongoose YouTube Videos](https://www.youtube.com/@mongoose-networking-library/videos) for reference.
+
+
+## Commercial use
+
+Mongoose is dual-licensed: GPLv2 and commercial. Use GPLv2 for evaluation and prototyping.
+Choose a commercial license when shipping production devices.
+
+Request a quote using the [quotation form](https://mongoose.ws/quote/) - we typically respond the same day. We also offer support, consultancy, and integration services.
+
+[Schedule a free, hands-on 45-minute session](https://calendar.app.google/QYLx4VD9is1PnYCG8) with a Mongoose engineer to troubleshoot or optimize development on your own hardware. Have your device and development environment ready.
+
+For any questions, please contact us at support@cesanta.com
