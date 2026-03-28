@@ -8,7 +8,7 @@
 #define MG_ARCH MG_ARCH_CUBE
 #define MG_ENABLE_PACKED_FS 1
 ```
-5. Edit the top-level `CMakeLists.txt` to add Mongoose files to the build process:
+5. Edit two sections in the top-level `CMakeLists.txt` to add Mongoose to the build:
 ```cmake
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
@@ -25,7 +25,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     ../../desktop/mongoose/
 )
 ```
-6. At the end of top-level `CMakeLists.txt`, add this snippet to generate .bin file:
+6. Add a section to the end of top-level `CMakeLists.txt` to generate .bin file:
 ```cmake
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_OBJCOPY} -O binary
