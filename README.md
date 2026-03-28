@@ -21,19 +21,19 @@ All projects implement the same core functionality: a professional Web UI dashbo
 
 ## make
 
-The `make` project is the most minimal bare-metal implementation. It uses only Mongoose and CMSIS headers and no external frameworks or vendor libraries. It includes lightweight `hal.c` / `hal.h` implemented directly on top of CMSIS. Best suited for understanding low-level
-integration, and production firmware with full control over the stack.
+The `make` project is the most minimal bare-metal implementation. It uses only Mongoose and CMSIS headers, with no external frameworks or vendor libraries. It includes lightweight `hal.c` / `hal.h` implemented directly on top of CMSIS. This variant is best suited for understanding low-level integration and building production firmware with full control over the stack.
 
 To build and run,
-1. [Set up your build environment](https://mongoose.ws/docs/getting-started/build-environment/)
-2. Clone this repository to your workstation
-3. Connect your board to your workstation via Ethernet and ensure the network provides a DHCP server. The simplest setup is to use a USB-to-Ethernet adapter, enable Internet sharing on your workstation, and plug the board directly into that adapter.
-4. Start serial console in a separate window
-5. Flash the firmware using [STM32CubeProgrammer](https://www.st.com/en/development-tools/stm32cubeprog.html)
-6. In the serial log, see the board's IP address, and load that IP address in the browser
-7. To test firmware updates, make a change to the firmware, rebuild the firmware,
-   then click on the firmware update button on the Firmware Update page,
-   and choose the built `firmware.bin` file.
+
+1. [Set up your build environment](https://mongoose.ws/docs/getting-started/build-environment/)  
+2. Clone this repository to your workstation  
+3. Connect your board to your workstation via Ethernet and ensure the network provides a DHCP server. The simplest setup is to use a USB-to-Ethernet adapter, enable Internet sharing on that adapter, and plug the board into that adapter  
+4. Start a serial console in a separate window  
+5. Flash the firmware using [STM32CubeProgrammer](https://www.st.com/en/development-tools/stm32cubeprog.html)  
+6. Check the serial log for the board's IP address and open it in a browser  
+7. To test firmware updates, make a change to the firmware and rebuild it,  
+   then click the firmware update button on the Firmware Update page  
+   and select the generated `firmware.bin` file  
 
 ## CubeMX
 
