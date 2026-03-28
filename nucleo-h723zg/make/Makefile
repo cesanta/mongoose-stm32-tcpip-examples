@@ -25,6 +25,8 @@ firmware.elf: cmsis_core cmsis_h7 hal.h link.ld Makefile $(SOURCES)
 
 firmware.bin: firmware.elf
 	arm-none-eabi-objcopy -O binary $< $@
+	@echo
+	@echo "To flash, run 'make flash', or use STM32CubeProgrammer"
 
 flash: firmware.bin
 	STM32_Programmer_CLI -c port=swd -e all -w firmware.elf -hardRst
