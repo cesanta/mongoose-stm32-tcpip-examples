@@ -37,25 +37,24 @@ To build and run,
 
 ## CubeMX
 
-The `cubemx` project provides STM32CubeMX-based setup. It includes a `.ioc` configuration file, and comes with integration instructions in README.md . To build and run,
+The `cubemx` project provides an STM32CubeMX-based setup. It includes a `.ioc` configuration file and comes with integration instructions in README.md. To build and run,
 
-1. Follow the instructions in the project's REAMDE.md file to build a firmware
-2. Start serial console in a separate window
-3. In the serial log, see the board's IP address, and load that IP address in the browser
-4. To test firmware updates, make a change to the firmware, rebuild the firmware,
-   then click on the firmware update button on the Firmware Update page,
-   and choose the built `.bin` file in the `build/Debug/` directory
+1. Follow the instructions in the project's README.md file to build the firmware  
+2. Start a serial console in a separate window  
+3. Check the serial log for the board's IP address and open it in a browser  
+4. To test firmware updates, make a change to the firmware and rebuild it,  
+   then click the firmware update button on the Firmware Update page  
+   and select the generated `.bin` file from the `build/Debug/` directory
 
 ## Customising for production
 
 The functionality is identical across all variants and is built using the [Web UI Builder](https://mongoose.ws/wizard/). To customize the dashboard for your production firmware,
-1. Open [Web UI Builder](https://mongoose.ws/wizard/) in the Chrome or Bing browser
-2. Click "Load" on the toolbar, choose `desktop/mongoose/mongoose_wizard.json`
-3. In the "Settings" tab on the bottom panel, choose `desktop` as the output directory
-4. Make the required changes
-5. Click on the "Generate C/C++ code" on top right
-6. Done! Now you can rebuild your embedded project, and it'll have an updated UI.
 
-Note - no frontend or networking expertise is required.
-See [Mongoose YouTube Videos](https://www.youtube.com/@mongoose-networking-library/videos)
-for the reference.
+1. Open the [Web UI Builder](https://mongoose.ws/wizard/) in Chrome or Bing  
+2. Click "Load" on the toolbar and select `desktop/mongoose/mongoose_wizard.json`  
+3. In the "Settings" tab at the bottom panel, set the output directory to `desktop`  
+4. Make the required changes  
+5. Click "Generate C/C++ code" in the top right corner  
+6. Done - rebuild your embedded project to apply the updated UI  
+
+Note - no frontend or networking expertise is required. See [Mongoose YouTube Videos](https://www.youtube.com/@mongoose-networking-library/videos) for reference.
