@@ -9,6 +9,7 @@
 #define LED2 PIN('B', 7)
 #define LED3 PIN('B', 14)
 
+// Redirect stdout debug output to UART
 int _write(int fd, char *ptr, int len) {
   if (fd == 1) hal_uart_write_buf(DEBUG_UART, ptr, (size_t) len);
   return len;

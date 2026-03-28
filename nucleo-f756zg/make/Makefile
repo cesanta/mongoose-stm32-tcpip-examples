@@ -11,7 +11,7 @@ LDFLAGS ?= -Tlink.ld -nostdlib -nostartfiles --specs nosys.specs -lc -lgcc -Wl,-
 SOURCES = main.c hal.c
 SOURCES += cmsis_f7/Source/Templates/gcc/startup_stm32f756xx.s
 
-MONGOOSE_DIR = ../desktop/mongoose
+MONGOOSE_DIR = ../../desktop/mongoose
 CFLAGS += -I$(MONGOOSE_DIR)
 SOURCES += $(MONGOOSE_DIR)/mongoose.c
 SOURCES += $(MONGOOSE_DIR)/mongoose_glue.c
