@@ -11,7 +11,7 @@ BOARD-NAME/
           cubemx/     <--- CubeMX: Vscode or CubeIDE
 ```
 
-Each project demonstrates the same core functionality: aProfessional Web UI dashboard (LED control + OTA firmware update) and MQTT-based remote device control and OTA updates
+Each project demonstrates the same core functionality: a professional Web UI dashboard (LED control + OTA firmware update) and MQTT-based remote device control and OTA updates
 
 <div align="center">
   <img src="screenshot.webp" alt="Mongoose Wizard dashboard" width="75%"/>
