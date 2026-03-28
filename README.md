@@ -18,7 +18,7 @@ All projects implement the same core functionality: a professional Web UI dashbo
 </div>
 
 
-The `make` project is the most minimal bare-metal implementation. It uses only Mongoose and CMSIS headers, no external frameworks or vendor libraries. It includes lightweight `hal.c` / `hal.h` implemented directly on top of CMSIS. Best suited for understanding low-level
+The `make` project is the most minimal bare-metal implementation. It uses only Mongoose and CMSIS headers and no external frameworks or vendor libraries. It includes lightweight `hal.c` / `hal.h` implemented directly on top of CMSIS. Best suited for understanding low-level
 integration, and production firmware with full control over the stack. In order to build
 these projects on your workstation, [set up your build environment](https://mongoose.ws/docs/getting-started/build-environment/).
 
