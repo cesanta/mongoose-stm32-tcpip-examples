@@ -1,4 +1,4 @@
-# STM32 Mongoose TCP/IP
+# Mongoose TCP/IP for STM32
 
 This repository contains example Mongoose projects for various STM32 development boards.
 [Mongoose](https://mongoose.ws/) is a networking library which includes built-in TCP/IP stack, TLS, HTTP, WebSocket, MQTT and firmware updates. Mongoose is a lightweight, 2-file alternative to lwIP or NetX, which is extremely easy to use in either bare metal or RTOS environment.
