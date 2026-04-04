@@ -32,8 +32,8 @@ Windows, Linux or Mac.
 The networking functionality on all these architectures is absolutely identical.
 Only the `mongoose_config.h` may be different.
 
-The "desktop" project has the actual Mongoose files. On this step, we tell our IDE to pick
-Mongoose files from the "desktop" project. This way we avoid duplication of identical
+Only the "desktop" project has the actual Mongoose files. On this step, we tell our IDE
+to pick Mongoose files from the "desktop" project. This way we avoid duplication of identical
 files for every single project.
 
 - If you're using CubeIDE right click on the project name on the left tree view,
