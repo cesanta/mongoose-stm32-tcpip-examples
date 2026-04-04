@@ -59,7 +59,16 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 )
 ```
 
-6. Configure your IDE to generate .bin firmware flash image file.
+## Configure .bin generation
+
+Normally, IDEs generate .elf firmware file, cause it is easier for a debugger
+to load it to a device. However, for the firmware OTA update, the .bin file
+is required. The .bin file is the firmware image that gets copied to the
+beginning of the microcontroller's flash memory and gets executed after the
+system boot.
+
+So, we need to tell the IDE to generate .bin firmware flash image file.
+
 - If you're using CubeIDE, select Project / Properties / C/C++ build / Settings
   / MCU/MPU Post build outputs, enable "Convert to binary file (-O binary)"
 - If you're using VSCode, add a section to the end of the top-level `CMakeLists.txt`:
