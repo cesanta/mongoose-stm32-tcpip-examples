@@ -207,4 +207,6 @@ static inline void hal_clock_init(void) {
   while ((RCC->CR & RCC_CR_PLL1RDY) == 0) spin(1);  // Wait until done
   RCC->CFGR1 |= (3 << 0);                           // Set clock source to PLL1
   while ((RCC->CFGR1 & (7 << 3)) != (3 << 3)) spin(1);  // Wait until done
+
+  SystemCoreClock = SYS_FREQUENCY;
 }

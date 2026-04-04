@@ -49,7 +49,6 @@ void my_set_leds(struct leds *data) {
 }
 
 int main(void) {
-  hal_clock_init();
   hal_uart_init(DEBUG_UART, DEBUG_UART_TX_PIN, DEBUG_UART_RX_PIN, 115200);
   hal_rng_init();
   hal_gpio_output(LED_1);

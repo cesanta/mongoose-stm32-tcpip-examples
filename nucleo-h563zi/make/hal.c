@@ -23,6 +23,8 @@ uint64_t hal_get_tick(void) {
 uint32_t SystemCoreClock = 160000000;
 void SystemInit(void) {  // Called automatically by startup code
   hal_system_init();  // Enable FPU
+  hal_clock_init();
+  SysTick_Config(SystemCoreClock / 1000);  // Sys tick every 1ms
 }
 
 void ExitRun0Mode(void) {}
