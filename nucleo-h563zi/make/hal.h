@@ -103,25 +103,21 @@ static inline void hal_gpio_output(uint16_t pin) {
             HAL_GPIO_PULL_NONE, 0);
 }
 
-static inline bool hal_uart_init(USART_TypeDef *uart, unsigned long baud) {
-  uint8_t af = 7;           // Alternate function
-  uint16_t rx = 0, tx = 0;  // pins
+static inline bool hal_uart_init(USART_TypeDef *uart, uint16_t tx_pin,
+                                 uint16_t rx_pin, unsigned long baud) {
   uint32_t freq = 0;        // Bus frequency. UART1 is on APB2, rest on APB1
 
   if (uart == USART1) {
     freq = APB2_FREQUENCY, RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
-    tx = PIN('A', 9), rx = PIN('A', 10);
   } else if (uart == USART2) {
     freq = APB1_FREQUENCY, RCC->APB1LENR |= RCC_APB1LENR_USART2EN;
-    tx = PIN('A', 2), rx = PIN('A', 3);
   } else if (uart == USART3) {
     freq = APB1_FREQUENCY, RCC->APB1LENR |= RCC_APB1LENR_USART3EN;
-    tx = PIN('D', 8), rx = PIN('D', 9);
   } else {
     return false;
   }
-  hal_gpio_init(tx, HAL_GPIO_MODE_AF, HAL_GPIO_OTYPE_PUSH_PULL, HAL_GPIO_SPEED_HIGH, 0, af);
-  hal_gpio_init(rx, HAL_GPIO_MODE_AF, HAL_GPIO_OTYPE_PUSH_PULL, HAL_GPIO_SPEED_HIGH, 0, af);
+  hal_gpio_init(tx_pin, HAL_GPIO_MODE_AF, HAL_GPIO_OTYPE_PUSH_PULL, HAL_GPIO_SPEED_HIGH, 0, 7U);
+  hal_gpio_init(rx_pin, HAL_GPIO_MODE_AF, HAL_GPIO_OTYPE_PUSH_PULL, HAL_GPIO_SPEED_HIGH, 0, 7U);
   uart->CR1 = 0;                            // Disable UART
   uart->BRR = freq / baud;                  // Set baud rate
   uart->CR1 = USART_CR1_RE | USART_CR1_TE;  // Set mode to TX & RX

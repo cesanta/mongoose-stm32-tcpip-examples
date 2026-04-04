@@ -5,6 +5,8 @@
 #include "mongoose_glue.h"
 
 #define DEBUG_UART USART3
+#define DEBUG_UART_TX_PIN PIN('D', 8)
+#define DEBUG_UART_RX_PIN PIN('D', 9)
 
 #define LED_1 PIN('B', 0)  // On-board LED pin (green)
 #define LED_2 PIN('F', 4)  // On-board LED pin (yellow)
@@ -48,11 +50,11 @@ void my_set_leds(struct leds *data) {
 
 int main(void) {
   hal_clock_init();
+  hal_uart_init(DEBUG_UART, DEBUG_UART_TX_PIN, DEBUG_UART_RX_PIN, 115200);
   hal_rng_init();
   hal_gpio_output(LED_1);
   hal_gpio_output(LED_2);
   hal_gpio_output(LED_3);
-  hal_uart_init(DEBUG_UART, 115200);
 
   hal_ethernet_init();
   mongoose_init();
