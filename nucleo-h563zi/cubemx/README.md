@@ -1,16 +1,47 @@
 # Mongoose CubeMX integration
 
-## Generating Cmake-based VSCode project
+## Generate project code
+- Clone this repo to your workstation. Open the .ioc file in your CubeMX
+- Click on "Project Manager"
+  - If you're using CubeIDE, select "CubeIDE" in the toolchain/IDE dropdown
+  - If you're using VSCode, select "Cmake" in the toolchain/IDE dropdown
+- Click "Generate Code" button on the top right
 
-1. Clone this repo to your workstation. Open the .ioc file in your CubeMX
-2. Click on "Project Manager", select "Cmake" as toolchain/IDE, click "Generate Code" on the right top. It will populate this directory with the generated project code.
-3. Open this directory in Vscode. Make sure you have STM32 Cube extension installed
-4. Add `Core/Inc/mongoose_config.h` file with the following contents:
+This should generate project code in this directory the directory where .ioc file lives.
+Open this directory in your IDE.
+
+## Add `mongoose_config.h`
+
+Add `Core/Inc/mongoose_config.h` file with the following contents:
 ```c
 #define MG_ARCH MG_ARCH_CUBE
 #define MG_ENABLE_PACKED_FS 1
 ```
-5. Edit two sections in the top-level `CMakeLists.txt` to add Mongoose to the build:
+
+This file contains Mongoose settings. As you can see, there only a few settings
+to set. Unlike other software, Mongoose does not provide you with dozens of
+options you have no clue about.
+However if you want to know about all settable build options, see https://mongoose.ws/docs/getting-started/build-options/
+
+## Add Mongoose files to the build
+
+This examples repo contains project for various architectures. Since Mongoose
+is cross-platform, one of the architectures is "desktop" - that's your workstation:
+Windows, Linux or Mac.
+
+The networking functionality on all these architectures is absolutely identical.
+Only the `mongoose_config.h` may be different.
+
+The "desktop" project has the actual Mongoose files. On this step, we tell our IDE to pick
+Mongoose files from the "desktop" project. This way we avoid duplication of identical
+files for every single project.
+
+- If you're using CubeIDE right click on the project name on the left tree view,
+  select New / Folder, Advanced, Link to alternate location, then select
+  `desktop/mongoose` in this repo. When it is added, right-click on it and choose
+  "Add/remove include path".
+- If you're using VSCode, edit two sections in the top-level `CMakeLists.txt`:
+
 ```cmake
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
@@ -27,7 +58,11 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     ../../desktop/mongoose/
 )
 ```
-6. Add a section to the end of top-level `CMakeLists.txt` to generate .bin file:
+
+6. Configure your IDE to generate .bin firmware flash image file.
+- If you're using CubeIDE, select Project / Properties / C/C++ build / Settings
+  / MCU/MPU Post build outputs, enable "Convert to binary file (-O binary)"
+- If you're using VSCode, add a section to the end of the top-level `CMakeLists.txt`:
 ```cmake
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_OBJCOPY} -O binary
@@ -35,12 +70,17 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
           ${PROJECT_NAME}.bin
 )
 ```
-6. Edit `Core/Src/main.c` and update the following snippets - notice the `USER CODE BEGIN` / `USER CODE END` placeholders. At the top of the file:
+
+## Call Mongoose from main.c
+
+Edit `Core/Src/main.c` and update the following snippets - notice the `USER CODE BEGIN` / `USER CODE END` placeholders. At the top of the file:
+
 ```c
 /* USER CODE BEGIN Includes */
 #include "mongoose_glue.h"
 /* USER CODE END Includes */
 ```
+
 Before the `main()` function:
 ```c
 /* USER CODE BEGIN 0 */
@@ -81,4 +121,7 @@ while (1)
 {
   /* USER CODE END WHILE */
 ```
-7. Build the firmware. See [top level README](../../README.md#cubemx) on how to test it
+
+## Build, flash, test
+
+Build the firmware. See [top level README](../../README.md#cubemx) on how to test it
