@@ -38,21 +38,20 @@ bool mg_random(void *buf, size_t len) {
   return true;
 }
 
-// void my_get_leds(struct leds *data) {
-//   data->led1 = hal_gpio_read(LED1);
-//   data->led2 = hal_gpio_read(LED2);
-//   data->led3 = hal_gpio_read(LED3);
-// }
-// void my_set_leds(struct leds *data) {
-//   hal_gpio_write(LED1, data->led1);
-//   hal_gpio_write(LED2, data->led2);
-//   hal_gpio_write(LED3, data->led3);
-// }
+void my_get_leds(struct leds *data) {
+  data->led1 = hal_gpio_read(LED_1);
+  data->led2 = hal_gpio_read(LED_2);
+  data->led3 = hal_gpio_read(LED_3);
+}
+void my_set_leds(struct leds *data) {
+  hal_gpio_write(LED_1, data->led1);
+  hal_gpio_write(LED_2, data->led2);
+  hal_gpio_write(LED_3, data->led3);
+}
 
 int main(void) {
   hal_uart_init(DEBUG_UART, UART_TX, UART_RX, 115200);
   hal_rng_init();
-  // hal_ethernet_init();
 
   // Initialise pins and turn them off: they are active high
   hal_gpio_output(LED_1), hal_gpio_write(LED_1, true);
@@ -62,11 +61,15 @@ int main(void) {
   printf("Initialised. CPU clock: %lu MHz\r\n", SystemCoreClock / 1000000);
   printf("APB1: %u, APB2: %u\r\n", HAL_APB1_FREQUENCY, HAL_APB2_FREQUENCY);
 
-  // mongoose_init();
-  // mongoose_set_http_handlers("leds", my_get_leds, my_set_leds);
+  hal_ethernet_init();
+  printf("=> %#lx %#lx %#lx\r\n", ETH1_BASE_NS, ETH1_BASE_S, ETH1_BASE);
+  printf("-> %#lx %#lx %#lx %#lx\r\n", RCC->CCIPR2, RCC->DIVENR, RCC->IC12CFGR, ETH1->DMAMR);
+
+  mongoose_init();
+  mongoose_set_http_handlers("leds", my_get_leds, my_set_leds);
 
   for (;;) {
-    // mongoose_poll();
+    mongoose_poll();
     blink_task();
   }
 

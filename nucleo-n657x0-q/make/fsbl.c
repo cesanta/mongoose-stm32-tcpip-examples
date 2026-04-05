@@ -14,7 +14,7 @@ static void xip_init(void) {
   enum {
     XSPI_AF = 9U,
     XSPI_FLASH_SIZE_BITS = 26U,      // 64 MiB MX25UM51245G
-    XSPI_KERNEL_DIV = HAL_XSPI_IC3_DIV,  // PLL1 1.6 GHz / 32 = 50 MHz kernel
+    XSPI_KERNEL_DIV = HAL_XSPI_IC3_DIV,  // PLL1 / div, capped at 50 MHz
     XSPI_CSHT_CYCLES = 3U,
     XSPI_REQ2ACK_CYCLES = 1U,
     XSPI_READ_OPCODE = 0x0CU,        // JEDEC 4-byte fast read

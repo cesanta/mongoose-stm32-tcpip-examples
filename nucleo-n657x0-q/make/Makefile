@@ -5,7 +5,7 @@ CFLAGS  = -W -Wall -Wextra -Wundef -Wshadow -Wdouble-promotion
 CFLAGS += -Wformat-truncation -fno-common -Wconversion -Wno-sign-conversion
 CFLAGS += -g3 -Os -ffunction-sections -fdata-sections
 CFLAGS += -I. -Icmsis_core/CMSIS/Core/Include -Icmsis_n6/Include
-CFLAGS += -mcpu=cortex-m55 -mthumb -mfloat-abi=soft -mfpu=fpv5-d16
+CFLAGS += -mcpu=cortex-m55 -mthumb -mfloat-abi=soft -mfpu=fpv5-d16 -mcmse
 CFLAGS += $(CFLAGS_EXTRA)
 LDFLAGS ?= -nostdlib -nostartfiles --specs nosys.specs -lc -lgcc -Wl,--gc-sections
 

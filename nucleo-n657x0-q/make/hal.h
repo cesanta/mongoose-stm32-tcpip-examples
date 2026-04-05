@@ -23,33 +23,55 @@ extern uint32_t SystemCoreClock;
 
 // UM3417 7.12
 #ifndef HAL_ETH_PINS
-#define HAL_ETH_PINS                                                  \
-  PIN('F', 4), PIN('F', 7), PIN('F', 10), PIN('F', 11), PIN('F', 12), \
-      PIN('F', 13), PIN('F', 14), PIN('F', 15), PIN('G', 11)
+#define HAL_ETH_PINS                                                 \
+  PIN('F', 4), PIN('G', 11), PIN('F', 5), PIN('F', 7), PIN('F', 10), \
+      PIN('F', 11), PIN('F', 12), PIN('F', 13), PIN('F', 14), PIN('F', 15)
 #endif
 
-#define HAL_SYS_FREQUENCY (400 * 1000 * 1000)
+#ifndef HAL_SYS_FREQUENCY
+#define HAL_SYS_FREQUENCY (600U * 1000U * 1000U)
+#endif
+
+#if ((HAL_SYS_FREQUENCY % (8U * 1000U * 1000U)) != 0U)
+#error "HAL_SYS_FREQUENCY must be a multiple of 8 MHz"
+#endif
+
+#if (HAL_SYS_FREQUENCY == 0U || HAL_SYS_FREQUENCY > (1600U * 1000U * 1000U))
+#error "HAL_SYS_FREQUENCY must be between 8 MHz and 1600 MHz"
+#endif
 
 enum {
   HAL_HSI_FREQUENCY = 64000000U,
+  HAL_PLL1_MAX_FREQUENCY = 1600000000U,
   HAL_PLL1_M = 1U,
-  HAL_PLL1_N = 25U,
   HAL_PLL1_P1 = 1U,
   HAL_PLL1_P2 = 1U,
-  HAL_XSPI_IC3_DIV = 32U,
+  HAL_ETH_TARGET_FREQUENCY = 100000000U,
+  HAL_XSPI_TARGET_FREQUENCY = 50000000U,
   HAL_HPRE = 4U,
   HAL_PPRE1 = 1U,
   HAL_PPRE2 = 1U,
   HAL_PPRE4 = 1U,
   HAL_PPRE5 = 1U,
-  HAL_PLL1_FREQUENCY =
-      HAL_HSI_FREQUENCY * HAL_PLL1_N / HAL_PLL1_M / HAL_PLL1_P1 / HAL_PLL1_P2,
-  HAL_SYSCLK_IC_DIV = HAL_PLL1_FREQUENCY / HAL_SYS_FREQUENCY,
-  HAL_AHB_FREQUENCY = HAL_PLL1_FREQUENCY / HAL_SYSCLK_IC_DIV / HAL_HPRE,
-  HAL_APB1_FREQUENCY = HAL_AHB_FREQUENCY / HAL_PPRE1,
-  HAL_APB2_FREQUENCY = HAL_AHB_FREQUENCY / HAL_PPRE2,
-  HAL_XSPI_KERNEL_FREQUENCY = HAL_PLL1_FREQUENCY / HAL_XSPI_IC3_DIV,
 };
+
+#define HAL_SYSCLK_IC_DIV (HAL_PLL1_MAX_FREQUENCY / HAL_SYS_FREQUENCY)
+#define HAL_PLL1_FREQUENCY (HAL_SYS_FREQUENCY * HAL_SYSCLK_IC_DIV)
+#define HAL_PLL1_N (HAL_PLL1_FREQUENCY / HAL_HSI_FREQUENCY)
+#define HAL_PLL1_N_FRAC                                                        \
+  ((uint32_t) (((((uint64_t) HAL_PLL1_FREQUENCY) % HAL_HSI_FREQUENCY) << 24) / \
+               HAL_HSI_FREQUENCY))
+#define HAL_AHB_FREQUENCY (HAL_SYS_FREQUENCY / HAL_HPRE)
+#define HAL_APB1_FREQUENCY (HAL_AHB_FREQUENCY / HAL_PPRE1)
+#define HAL_APB2_FREQUENCY (HAL_AHB_FREQUENCY / HAL_PPRE2)
+#define HAL_ETH_IC12_DIV                                  \
+  ((HAL_PLL1_FREQUENCY + HAL_ETH_TARGET_FREQUENCY - 1U) / \
+   HAL_ETH_TARGET_FREQUENCY)
+#define HAL_ETH_KERNEL_FREQUENCY (HAL_PLL1_FREQUENCY / HAL_ETH_IC12_DIV)
+#define HAL_XSPI_IC3_DIV                                   \
+  ((HAL_PLL1_FREQUENCY + HAL_XSPI_TARGET_FREQUENCY - 1U) / \
+   HAL_XSPI_TARGET_FREQUENCY)
+#define HAL_XSPI_KERNEL_FREQUENCY (HAL_PLL1_FREQUENCY / HAL_XSPI_IC3_DIV)
 
 enum {
   HAL_GPIO_MODE_INPUT = 0U,
@@ -141,7 +163,8 @@ static inline void hal_gpio_analog(uint16_t pin) {
                 HAL_GPIO_SPEED_LOW, HAL_GPIO_PULL_NONE, 0U);
 }
 
-static inline bool hal_uart_init(USART_TypeDef *uart, uint16_t tx, uint16_t rx, unsigned long baud) {
+static inline bool hal_uart_init(USART_TypeDef *uart, uint16_t tx, uint16_t rx,
+                                 unsigned long baud) {
   uint32_t freq = 0U;
   // uint32_t ready = USART_ISR_TEACK | USART_ISR_REACK;
 
@@ -235,24 +258,44 @@ static inline uint32_t hal_rng_read(void) {
 
 static inline void hal_ethernet_init(void) {
   uint16_t pins[] = {HAL_ETH_PINS};
+
+  RCC->AHB5RSTSR = RCC_AHB5RSTSR_ETH1RSTS;
+  (void) RCC->AHB5RSTSR;
+
+  // Keep the MAC kernel clock near 100 MHz even when the CPU clock changes.
+  CLRSET(RCC->IC12CFGR, RCC_IC12CFGR_IC12SEL | RCC_IC12CFGR_IC12INT,
+         (((uint32_t) (HAL_ETH_IC12_DIV - 1U) << RCC_IC12CFGR_IC12INT_Pos) &
+          RCC_IC12CFGR_IC12INT));
+  RCC->DIVENSR = RCC_DIVENSR_IC12ENS;
+  (void) RCC->DIVENR;
+
+  // This board uses RMII with the PHY-provided 50 MHz RMII_REF_CLK on PF7.
+  // Configure the interface while ETH1 is held in reset, before enabling it.
+  CLRSET(RCC->CCIPR2,
+         RCC_CCIPR2_ETH1CLKSEL | RCC_CCIPR2_ETH1SEL | RCC_CCIPR2_ETH1REFCLKSEL |
+             RCC_CCIPR2_ETH1GTXCLKSEL,
+         RCC_CCIPR2_ETH1CLKSEL_1 | RCC_CCIPR2_ETH1SEL_2);
+  (void) RCC->CCIPR2;
+
+  RCC->AHB5ENSR = RCC_AHB5ENSR_ETH1MACENS | RCC_AHB5ENSR_ETH1TXENS |
+                  RCC_AHB5ENSR_ETH1RXENS | RCC_AHB5ENSR_ETH1ENS;
+  (void) RCC->AHB5ENR;
+  RCC->AHB5RSTCR = RCC_AHB5RSTCR_ETH1RSTC;
+  (void) RCC->AHB5RSTSR;
+
   for (size_t i = 0; i < sizeof(pins) / sizeof(pins[0]); i++) {
     hal_gpio_init(pins[i], HAL_GPIO_MODE_AF, HAL_GPIO_OTYPE_PUSH_PULL,
                   HAL_GPIO_SPEED_VERY_HIGH, HAL_GPIO_PULL_NONE, 11);
   }
   NVIC_EnableIRQ(ETH1_IRQn);  // Setup Ethernet IRQ handler
-
-  RCC->AHB5ENR |= RCC_AHB5ENR_ETH1MACEN | RCC_AHB5ENR_ETH1TXEN |
-                  RCC_AHB5ENR_ETH1RXEN | RCC_AHB5ENR_ETH1EN;
-  (void) RCC->AHB5ENR;
-  // CLRSET(SYSCFG->PMCR, 7 << 21, 4 << 21);      // Use RMII (12.3.1)
-  // RCC->AHB1ENR |= BIT(15) | BIT(16) | BIT(17);  // Enable Ethernet clocks
 }
 
 static inline bool hal_clock_init(uint32_t cpu_freq) {
   uint32_t cpu_divider = 0U;
 
-  // Keep PLL1 fixed for the SYS/XSPI clock tree and derive CPUCLK from IC1.
-  // That means the requested CPU clock must map cleanly to a PLL1 / N divider.
+  // Keep the PLL high enough for the SYS/XSPI tree, then derive CPUCLK from
+  // IC1. HAL_SYS_FREQUENCY is restricted to 8 MHz steps so PLL1 DIVNFRAC stays
+  // exact.
   if (cpu_freq == 0U || (cpu_freq % 8000000U) != 0U) return false;
   if ((HAL_PLL1_FREQUENCY % cpu_freq) != 0U) return false;
   cpu_divider = HAL_PLL1_FREQUENCY / cpu_freq;
@@ -266,8 +309,7 @@ static inline bool hal_clock_init(uint32_t cpu_freq) {
   for (volatile uint32_t n = 0; n < 1000000U; n++) {
     const uint32_t voscr = PWR->VOSCR;
     const uint32_t requested = (voscr & PWR_VOSCR_VOS) >> PWR_VOSCR_VOS_Pos;
-    const uint32_t applied =
-        (voscr & PWR_VOSCR_ACTVOS) >> PWR_VOSCR_ACTVOS_Pos;
+    const uint32_t applied = (voscr & PWR_VOSCR_ACTVOS) >> PWR_VOSCR_ACTVOS_Pos;
     if ((voscr & PWR_VOSCR_VOSRDY) != 0U || requested == applied) break;
   }
 
@@ -291,21 +333,29 @@ static inline bool hal_clock_init(uint32_t cpu_freq) {
        RCC_PLL1CFGR1_PLL1DIVM) |
           (((uint32_t) HAL_PLL1_N << RCC_PLL1CFGR1_PLL1DIVN_Pos) &
            RCC_PLL1CFGR1_PLL1DIVN));
-  CLRSET(RCC->PLL1CFGR2, RCC_PLL1CFGR2_PLL1DIVNFRAC, 0U);
+  RCC->PLL1CFGR3 |= RCC_PLL1CFGR3_PLL1MODSSDIS;
+  RCC->PLL1CFGR3 &= ~(RCC_PLL1CFGR3_PLL1MODDSEN | RCC_PLL1CFGR3_PLL1DACEN);
+  CLRSET(RCC->PLL1CFGR2, RCC_PLL1CFGR2_PLL1DIVNFRAC,
+         ((uint32_t) HAL_PLL1_N_FRAC << RCC_PLL1CFGR2_PLL1DIVNFRAC_Pos) &
+             RCC_PLL1CFGR2_PLL1DIVNFRAC);
   CLRSET(RCC->PLL1CFGR3,
-         RCC_PLL1CFGR3_PLL1PDIV1 | RCC_PLL1CFGR3_PLL1PDIV2 |
-             RCC_PLL1CFGR3_PLL1PDIVEN,
+         RCC_PLL1CFGR3_PLL1MODSSRST | RCC_PLL1CFGR3_PLL1DACEN |
+             RCC_PLL1CFGR3_PLL1MODDSEN | RCC_PLL1CFGR3_PLL1PDIV1 |
+             RCC_PLL1CFGR3_PLL1PDIV2 | RCC_PLL1CFGR3_PLL1PDIVEN,
          (((uint32_t) HAL_PLL1_P1 << RCC_PLL1CFGR3_PLL1PDIV1_Pos) &
           RCC_PLL1CFGR3_PLL1PDIV1) |
              (((uint32_t) HAL_PLL1_P2 << RCC_PLL1CFGR3_PLL1PDIV2_Pos) &
               RCC_PLL1CFGR3_PLL1PDIV2) |
-             RCC_PLL1CFGR3_PLL1PDIVEN);
+             RCC_PLL1CFGR3_PLL1MODSSRST | RCC_PLL1CFGR3_PLL1PDIVEN |
+             (HAL_PLL1_N_FRAC != 0U
+                  ? RCC_PLL1CFGR3_PLL1MODDSEN | RCC_PLL1CFGR3_PLL1DACEN
+                  : 0U));
   RCC->CR |= RCC_CR_PLL1ON;
   while ((RCC->SR & RCC_SR_PLL1RDY) == 0U) (void) 0;
 
   CLRSET(RCC->CFGR2,
-         RCC_CFGR2_HPRE | RCC_CFGR2_PPRE1 | RCC_CFGR2_PPRE2 |
-             RCC_CFGR2_PPRE4 | RCC_CFGR2_PPRE5,
+         RCC_CFGR2_HPRE | RCC_CFGR2_PPRE1 | RCC_CFGR2_PPRE2 | RCC_CFGR2_PPRE4 |
+             RCC_CFGR2_PPRE5,
          ((uint32_t) hal_div2prescval(HAL_HPRE) << RCC_CFGR2_HPRE_Pos) |
              ((uint32_t) hal_div2prescval(HAL_PPRE1) << RCC_CFGR2_PPRE1_Pos) |
              ((uint32_t) hal_div2prescval(HAL_PPRE2) << RCC_CFGR2_PPRE2_Pos) |
@@ -323,9 +373,8 @@ static inline bool hal_clock_init(uint32_t cpu_freq) {
   CLRSET(RCC->IC11CFGR, RCC_IC11CFGR_IC11SEL | RCC_IC11CFGR_IC11INT,
          (((uint32_t) (HAL_SYSCLK_IC_DIV - 1U) << RCC_IC11CFGR_IC11INT_Pos) &
           RCC_IC11CFGR_IC11INT));
-  RCC->DIVENSR =
-      RCC_DIVENSR_IC1ENS | RCC_DIVENSR_IC2ENS | RCC_DIVENSR_IC6ENS |
-      RCC_DIVENSR_IC11ENS;
+  RCC->DIVENSR = RCC_DIVENSR_IC1ENS | RCC_DIVENSR_IC2ENS | RCC_DIVENSR_IC6ENS |
+                 RCC_DIVENSR_IC11ENS;
 
   // Keep the system buses on the Cube-compatible IC2/IC6/IC11 path so XIP
   // timings stay unchanged, and drive only CPUCLK from IC1.
