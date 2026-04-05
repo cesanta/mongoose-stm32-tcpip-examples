@@ -26,7 +26,8 @@ void SystemInit(void) {
   SysTick_Config(SystemCoreClock / 1000U);
 }
 
-void ExitRun0Mode(void) {}
+void ExitRun0Mode(void) {
+}
 
 struct stat;
 __attribute__((weak)) int _fstat(int fd, struct stat *st) {

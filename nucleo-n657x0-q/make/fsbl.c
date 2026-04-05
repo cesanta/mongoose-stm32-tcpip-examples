@@ -7,23 +7,25 @@
 uint32_t SystemCoreClock;
 void SystemInit(void) {
   hal_system_init();
-  if (!hal_clock_init(HAL_SYS_FREQUENCY)) for (;;) (void) 0;
+  if (!hal_clock_init(HAL_SYS_FREQUENCY)) {
+    for (;;) (void) 0;
+  }
 }
 
 static void xip_init(void) {
   enum {
     XSPI_AF = 9U,
-    XSPI_FLASH_SIZE_BITS = 26U,      // 64 MiB MX25UM51245G
+    XSPI_FLASH_SIZE_BITS = 26U,          // 64 MiB MX25UM51245G
     XSPI_KERNEL_DIV = HAL_XSPI_IC3_DIV,  // PLL1 / div, capped at 50 MHz
     XSPI_CSHT_CYCLES = 3U,
     XSPI_REQ2ACK_CYCLES = 1U,
-    XSPI_READ_OPCODE = 0x0CU,        // JEDEC 4-byte fast read
+    XSPI_READ_OPCODE = 0x0CU,  // JEDEC 4-byte fast read
     XSPI_READ_DUMMY_CYCLES = 8U,
   };
   static const uint16_t xspi_pins[] = {
-      PIN('N', 4),  PIN('N', 6),  PIN('N', 8),  PIN('N', 0), PIN('N', 3),
-      PIN('N', 5),  PIN('N', 1),  PIN('N', 9),  PIN('N', 2), PIN('N', 10),
-      PIN('N', 11),
+      PIN('N', 4), PIN('N', 6),  PIN('N', 8),  PIN('N', 0),
+      PIN('N', 3), PIN('N', 5),  PIN('N', 1),  PIN('N', 9),
+      PIN('N', 2), PIN('N', 10), PIN('N', 11),
   };
   const uint32_t clear_flags =
       XSPI_FCR_CTCF | XSPI_FCR_CTEF | XSPI_FCR_CSMF | XSPI_FCR_CTOF;
@@ -44,20 +46,16 @@ static void xip_init(void) {
   PWR->SVMCR3 |= PWR_SVMCR3_VDDIO2SV | PWR_SVMCR3_VDDIO3SV;
 
   SYSCFG->VDDIO2CCCR = SYSCFG_VDDIO2CCCR_CS | SYSCFG_VDDIO2CCCR_RAPSRC_3 |
-                       SYSCFG_VDDIO2CCCR_RANSRC_0 |
-                       SYSCFG_VDDIO2CCCR_RANSRC_1 |
+                       SYSCFG_VDDIO2CCCR_RANSRC_0 | SYSCFG_VDDIO2CCCR_RANSRC_1 |
                        SYSCFG_VDDIO2CCCR_RANSRC_2;
   SYSCFG->VDDIO3CCCR = SYSCFG_VDDIO3CCCR_CS | SYSCFG_VDDIO3CCCR_RAPSRC_3 |
-                       SYSCFG_VDDIO3CCCR_RANSRC_0 |
-                       SYSCFG_VDDIO3CCCR_RANSRC_1 |
+                       SYSCFG_VDDIO3CCCR_RANSRC_0 | SYSCFG_VDDIO3CCCR_RANSRC_1 |
                        SYSCFG_VDDIO3CCCR_RANSRC_2;
   SYSCFG->VDDIO4CCCR = SYSCFG_VDDIO4CCCR_CS | SYSCFG_VDDIO4CCCR_RAPSRC_3 |
-                       SYSCFG_VDDIO4CCCR_RANSRC_0 |
-                       SYSCFG_VDDIO4CCCR_RANSRC_1 |
+                       SYSCFG_VDDIO4CCCR_RANSRC_0 | SYSCFG_VDDIO4CCCR_RANSRC_1 |
                        SYSCFG_VDDIO4CCCR_RANSRC_2;
   SYSCFG->VDDIO5CCCR = SYSCFG_VDDIO5CCCR_CS | SYSCFG_VDDIO5CCCR_RAPSRC_3 |
-                       SYSCFG_VDDIO5CCCR_RANSRC_0 |
-                       SYSCFG_VDDIO5CCCR_RANSRC_1 |
+                       SYSCFG_VDDIO5CCCR_RANSRC_0 | SYSCFG_VDDIO5CCCR_RANSRC_1 |
                        SYSCFG_VDDIO5CCCR_RANSRC_2;
   SYSCFG->VDDCCCR = SYSCFG_VDDCCCR_CS | SYSCFG_VDDCCCR_RAPSRC_3 |
                     SYSCFG_VDDCCCR_RANSRC_0 | SYSCFG_VDDCCCR_RANSRC_1 |
@@ -121,7 +119,7 @@ static void jump_to_app(void) {
 
   __set_MSP(sp);
   ((void (*)(void)) pc)();  // Jump to the application entry point
-  for (;;) (void) 0;  // Hang
+  for (;;) (void) 0;        // Hang
 }
 
 int main(void) {

@@ -22,7 +22,7 @@
 // #define MG_TCPIP_MASK MG_IPV4(255, 255, 255, 0)  // Netmask
 
 // Construct MAC address from the MCU unique ID
-#define MGUID ((uint32_t *) 0x1ff1e800)  // Unique 96-bit chip ID
+#define MGUID ((uint32_t *) 0x56009014UL)  // Unique 96-bit chip ID
 #define MG_SET_MAC_ADDRESS(mac)      \
   do {                               \
     mac[0] = 2;                      \

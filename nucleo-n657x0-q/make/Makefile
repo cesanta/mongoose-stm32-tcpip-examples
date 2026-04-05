@@ -22,7 +22,7 @@ SOURCES += $(MONGOOSE_DIR)/mongoose_glue.c
 SOURCES += $(MONGOOSE_DIR)/mongoose_impl.c
 SOURCES += $(MONGOOSE_DIR)/mongoose_fs.c
 
-all: firmware.bin
+all: firmware.bin fsbl.signed.bin
 
 firmware.elf: cmsis_core cmsis_n6 hal.h link.ld Makefile $(SOURCES)
 	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(LDFLAGS) -Tlink.ld -o $@
@@ -34,7 +34,7 @@ fsbl.elf: cmsis_core cmsis_n6 hal.h fsbl.ld Makefile $(FSBL_SOURCES)
 	arm-none-eabi-objcopy -O binary $< $@
 
 fsbl.signed.bin: fsbl.bin
-	STM32_SigningTool_CLI -s -bin $^ -nk -of 0x80000000 -t fsbl -hv 2.3 -o $@ -align
+	STM32_SigningTool_CLI -s -nk -of 0x80000000 -t fsbl -hv 2.3 -align -bin $^ -o $@
 
 flash: fsbl.signed.bin firmware.bin
 	STM32_Programmer_CLI -c port=swd mode=HOTPLUG -el MX25UM51245G_STM32N6570-NUCLEO.stldr -d firmware.bin 0x70100000 -hardRst

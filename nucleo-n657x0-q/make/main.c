@@ -63,10 +63,12 @@ int main(void) {
 
   hal_ethernet_init();
   printf("=> %#lx %#lx %#lx\r\n", ETH1_BASE_NS, ETH1_BASE_S, ETH1_BASE);
-  printf("-> %#lx %#lx %#lx %#lx\r\n", RCC->CCIPR2, RCC->DIVENR, RCC->IC12CFGR, ETH1->DMAMR);
+  printf("-> %#lx %#lx %#lx %#lx\r\n", RCC->CCIPR2, RCC->DIVENR, RCC->IC12CFGR,
+         ETH1->DMAMR);
 
   mongoose_init();
   mongoose_set_http_handlers("leds", my_get_leds, my_set_leds);
+  MG_INFO(("Init done ..."));
 
   for (;;) {
     mongoose_poll();

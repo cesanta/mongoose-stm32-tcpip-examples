@@ -24,8 +24,8 @@ extern uint32_t SystemCoreClock;
 // UM3417 7.12
 #ifndef HAL_ETH_PINS
 #define HAL_ETH_PINS                                                 \
-  PIN('F', 4), PIN('G', 11), PIN('F', 5), PIN('F', 7), PIN('F', 10), \
-      PIN('F', 11), PIN('F', 12), PIN('F', 13), PIN('F', 14), PIN('F', 15)
+  PIN('F', 4), PIN('F', 5), PIN('F', 7), PIN('F', 10), PIN('F', 11), \
+      PIN('F', 12), PIN('F', 13), PIN('F', 14), PIN('F', 15), PIN('G', 11),
 #endif
 
 #ifndef HAL_SYS_FREQUENCY
@@ -104,6 +104,13 @@ static inline void hal_gpio_enable_clock(uint16_t pin) {
   const uint32_t bank = (uint32_t) PINBANK(pin);
   RCC->AHB4ENR |= BIT(bank);
   (void) RCC->AHB4ENR;  // Read back to ensure the write completes before access
+}
+
+static inline void hal_gpio_set_secure_nonpriv(uint16_t pin) {
+  const uint32_t mask = BIT((uint32_t) PINNO(pin));
+  GPIO_TypeDef *gpio = hal_gpio_bank(pin);
+  gpio->SECCFGR |= mask;    // Secure
+  gpio->PRIVCFGR &= ~mask;  // Clear privileged-only protection
 }
 
 static inline void hal_gpio_init(uint16_t pin, uint8_t mode, uint8_t otype,
@@ -256,6 +263,19 @@ static inline uint32_t hal_rng_read(void) {
   return RNG->DR;
 }
 
+static inline void hal_eth_set_secure_nonpriv(uint32_t cid,
+                                              uint32_t master_index,
+                                              uint32_t slave_index) {
+  const uint32_t slave_reg = (slave_index >> 28) & 0xFU;
+  const uint32_t slave_mask = BIT(slave_index & 0x1FU);
+
+  RIFSC->RIMC_ATTRx[master_index] =
+      ((cid & 0x7U) << RIFSC_RIMC_ATTRx_MCID_Pos) | RIFSC_RIMC_ATTRx_MSEC;
+
+  RIFSC->RISC_SECCFGRx[slave_reg] |= slave_mask;
+  RIFSC->RISC_PRIVCFGRx[slave_reg] &= ~slave_mask;
+}
+
 static inline void hal_ethernet_init(void) {
   uint16_t pins[] = {HAL_ETH_PINS};
 
@@ -283,9 +303,13 @@ static inline void hal_ethernet_init(void) {
   RCC->AHB5RSTCR = RCC_AHB5RSTCR_ETH1RSTC;
   (void) RCC->AHB5RSTSR;
 
+  // RIF_CID_1=2,RIF_MASTER_INDEX_ETH1=6,RIF_RISC_PERIPH_INDEX_ETH1=0x1000001c
+  hal_eth_set_secure_nonpriv(2U, 6U, 0x1000001CU);
+
   for (size_t i = 0; i < sizeof(pins) / sizeof(pins[0]); i++) {
     hal_gpio_init(pins[i], HAL_GPIO_MODE_AF, HAL_GPIO_OTYPE_PUSH_PULL,
                   HAL_GPIO_SPEED_VERY_HIGH, HAL_GPIO_PULL_NONE, 11);
+    // hal_gpio_set_secure_nonpriv(pins[i]);
   }
   NVIC_EnableIRQ(ETH1_IRQn);  // Setup Ethernet IRQ handler
 }
