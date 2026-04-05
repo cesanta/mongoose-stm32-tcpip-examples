@@ -22,7 +22,7 @@ SOURCES += $(MONGOOSE_DIR)/mongoose_glue.c
 SOURCES += $(MONGOOSE_DIR)/mongoose_impl.c
 SOURCES += $(MONGOOSE_DIR)/mongoose_fs.c
 
-all: firmware.bin fsbl.signed.bin
+all: fsbl.signed.bin firmware.bin 
 
 firmware.elf: cmsis_core cmsis_n6 hal.h link.ld Makefile $(SOURCES)
 	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(LDFLAGS) -Tlink.ld -o $@
@@ -32,6 +32,12 @@ fsbl.elf: cmsis_core cmsis_n6 hal.h fsbl.ld Makefile $(FSBL_SOURCES)
 
 %.bin: %.elf
 	arm-none-eabi-objcopy -O binary $< $@
+	@echo
+	@echo "To flash:"
+	@echo "   1. set the BOOT1 jumper to position 1, click reset button"
+	@echo "   2. run 'make flash'"
+	@echo "   3. set the BOOT1 jumper to position 0, click reset button"
+	@echo "   NOTE: STM32_Programmer_CLI and STM32_SigningTool_CLI should be in your PATH"
 
 fsbl.signed.bin: fsbl.bin
 	STM32_SigningTool_CLI -s -nk -of 0x80000000 -t fsbl -hv 2.3 -align -bin $^ -o $@
