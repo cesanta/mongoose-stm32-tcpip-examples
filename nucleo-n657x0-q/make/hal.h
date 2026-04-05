@@ -263,55 +263,64 @@ static inline uint32_t hal_rng_read(void) {
   return RNG->DR;
 }
 
-static inline void hal_eth_set_secure_nonpriv(uint32_t cid,
-                                              uint32_t master_index,
-                                              uint32_t slave_index) {
+static inline void hal_eth_set_secure(uint32_t cid, uint32_t master_index,
+                                      uint32_t slave_index, bool priv) {
   const uint32_t slave_reg = (slave_index >> 28) & 0xFU;
   const uint32_t slave_mask = BIT(slave_index & 0x1FU);
 
   RIFSC->RIMC_ATTRx[master_index] =
-      ((cid & 0x7U) << RIFSC_RIMC_ATTRx_MCID_Pos) | RIFSC_RIMC_ATTRx_MSEC;
+      ((cid & 0x7U) << RIFSC_RIMC_ATTRx_MCID_Pos) | RIFSC_RIMC_ATTRx_MSEC |
+      (priv ? RIFSC_RIMC_ATTRx_MPRIV : 0);
 
   RIFSC->RISC_SECCFGRx[slave_reg] |= slave_mask;
-  RIFSC->RISC_PRIVCFGRx[slave_reg] &= ~slave_mask;
+  if (priv) {
+    RIFSC->RISC_PRIVCFGRx[slave_reg] |= slave_mask;
+  } else {
+    RIFSC->RISC_PRIVCFGRx[slave_reg] &= ~slave_mask;
+  }
 }
 
 static inline void hal_ethernet_init(void) {
   uint16_t pins[] = {HAL_ETH_PINS};
 
+  // Hold ETH1 in reset while clock path is configured
   RCC->AHB5RSTSR = RCC_AHB5RSTSR_ETH1RSTS;
   (void) RCC->AHB5RSTSR;
 
-  // Keep the MAC kernel clock near 100 MHz even when the CPU clock changes.
+  // IC12 from the PLL1-based clock tree used by hal_clock_init()
   CLRSET(RCC->IC12CFGR, RCC_IC12CFGR_IC12SEL | RCC_IC12CFGR_IC12INT,
-         (((uint32_t) (HAL_ETH_IC12_DIV - 1U) << RCC_IC12CFGR_IC12INT_Pos) &
-          RCC_IC12CFGR_IC12INT));
+         RCC_IC12CFGR_IC12SEL_1 | ((((uint32_t) (HAL_ETH_IC12_DIV - 1U))
+                                    << RCC_IC12CFGR_IC12INT_Pos) &
+                                   RCC_IC12CFGR_IC12INT));
   RCC->DIVENSR = RCC_DIVENSR_IC12ENS;
   (void) RCC->DIVENR;
 
-  // This board uses RMII with the PHY-provided 50 MHz RMII_REF_CLK on PF7.
-  // Configure the interface while ETH1 is held in reset, before enabling it.
+  // Keep ETH1SEL_2, ETH1CLKSEL_1. Clear ETH1REFCLKSEL ETH1GTXCLKSEL
   CLRSET(RCC->CCIPR2,
          RCC_CCIPR2_ETH1CLKSEL | RCC_CCIPR2_ETH1SEL | RCC_CCIPR2_ETH1REFCLKSEL |
              RCC_CCIPR2_ETH1GTXCLKSEL,
          RCC_CCIPR2_ETH1CLKSEL_1 | RCC_CCIPR2_ETH1SEL_2);
   (void) RCC->CCIPR2;
 
+  // Enable ETH1 clocks
   RCC->AHB5ENSR = RCC_AHB5ENSR_ETH1MACENS | RCC_AHB5ENSR_ETH1TXENS |
                   RCC_AHB5ENSR_ETH1RXENS | RCC_AHB5ENSR_ETH1ENS;
   (void) RCC->AHB5ENR;
+
+  // Release reset
   RCC->AHB5RSTCR = RCC_AHB5RSTCR_ETH1RSTC;
   (void) RCC->AHB5RSTSR;
 
-  // RIF_CID_1=2,RIF_MASTER_INDEX_ETH1=6,RIF_RISC_PERIPH_INDEX_ETH1=0x1000001c
-  hal_eth_set_secure_nonpriv(2U, 6U, 0x1000001CU);
+  // Set ETH1 in secure privileged mode
+  hal_eth_set_secure(1U, 6U, 0x1000001CU, true);
 
+  // Configure pins in RMII AF
   for (size_t i = 0; i < sizeof(pins) / sizeof(pins[0]); i++) {
     hal_gpio_init(pins[i], HAL_GPIO_MODE_AF, HAL_GPIO_OTYPE_PUSH_PULL,
                   HAL_GPIO_SPEED_VERY_HIGH, HAL_GPIO_PULL_NONE, 11);
-    // hal_gpio_set_secure_nonpriv(pins[i]);
   }
-  NVIC_EnableIRQ(ETH1_IRQn);  // Setup Ethernet IRQ handler
+
+  NVIC_EnableIRQ(ETH1_IRQn);
 }
 
 static inline bool hal_clock_init(uint32_t cpu_freq) {
