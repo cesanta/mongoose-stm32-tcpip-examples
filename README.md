@@ -5,15 +5,17 @@ This repository contains example Mongoose projects for various STM32 development
 Mongoose is used by thousands of companies, including NASA who runs it on International
 Space Station.
 
-Every board has two direcotories containing projects for different build systems:
+Every board has two directories containing projects for different build
+systems:
 
 ```text
 BOARD-NAME/
-          make/       <--- make+GCC: minimal, pure CMSIS
-          cubemx/     <--- CubeMX: Vscode or CubeIDE
+          make/       <--- GCC + make: minimal, CMSIS headers + Mongoose only
+          cubemx/     <--- CubeMX: VSCode or CubeIDE, using Cube HAL
 ```
 
-All projects implement the same core functionality: a professional Web UI dashboard with LED control and OTA firmware update.
+All projects implement the same core functionality: a professional Web UI
+dashboard with LED control and OTA firmware update.
 
 <div align="center">
   <img src="screenshot.webp" alt="Mongoose Wizard dashboard" width="75%"/>
