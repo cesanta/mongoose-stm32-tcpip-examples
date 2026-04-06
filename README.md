@@ -52,7 +52,7 @@ The `cubemx` project provides an STM32CubeMX-based setup. It includes a `.ioc` c
 
 The functionality is identical across all projects and is built using the [Web UI Builder](https://mongoose.ws/wizard/). To customize the dashboard for your production firmware,
 
-1. Open the [Web UI Builder](https://mongoose.ws/wizard/) in Chrome or Bing  
+1. Open the [Web UI Builder](https://mongoose.ws/wizard/) in Chrome or Edge  
 2. Click "Load" on the toolbar and select `desktop/mongoose/mongoose_wizard.json`  
 3. In the "Settings" tab at the bottom panel, set the output directory to `desktop`  
 4. Make the required changes  
