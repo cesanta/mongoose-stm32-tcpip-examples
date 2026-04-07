@@ -12,18 +12,19 @@ here are the steps:
   it from the list, click "Start project" on the top right, choose "Secure domain only"
 - Project Manager: Project name: "n657". Project location: path to this directory.
   Project strucure: "FSBL" only. Toolchain/IDE: pick ether Cmake or CubeIDE.
-- RIF:
-  - Peripherals (RISUP), enable "Privilege" on ETH1
-  - Domains (RIMU): for ETH1, enable SECURE and PRIVILEGE
+- Clock configuration: Find SYSB, enter 400 MHz, Resolve clock issues
 - MCU pinout view: set PG0, PG8, PG10 to GPIO_Output mode
+- Pinout & Configuration / System Core: click on "GPIO", then click on each
+  of the PG0, PG8, PG10 pins and select Pin Context Assignment / First Stage Boot Loader
 - Pinout & Configuration / Security: Enable RIF and RNG for FSBL, click on RNG, check Activate
 - Pinout & Configuration / Connectivity: enable USART1 for FSBL, mode asynchronous,
   configure pins PE5 and PE6 for USART1 function
 - Pinout & Configuration / Connectivity: enable ETH1 for FSBL, mode RMII,
   pins PF4, PF5, PF7, PF10, PF11, PF12, PF13, PF14, PF15, PG11 for Ethernet function
-- Pinout & Configuration / Connectivity: enable RNG and RIF for FSBL
-- Pinout & Configuration / System Core: click on "GPIO", then click on each
-  of the PG0, PG8, PG10 pins and select Pin Context Assignment / First Stage Boot Loader
+- RIF:
+  - Peripherals (RISUP), enable "Privilege" on ETH1
+  - Domains (RIMU): for ETH1, enable SECURE and PRIVILEGE
+- Clock configuration: resolve clocks if required. Find "To ETH1" and make sure it has 100 MHz
 
 ## Generate project code
 - Clone this repo to your workstation. Open the .ioc file in your CubeMX
@@ -68,7 +69,7 @@ files for every single project.
 
 - If you're using CubeIDE: Project / Properties / C/C++ General / Paths and Symols
   - Source Location /Link Folder / Advanced / Link to folder in the file system / Browse, choose `desktop/mongoose` directory
-  - Includes / Add / Filesystem, choose `desktop/mongoose` directory
+  - Includes / Add / Filesystem, choose `desktop/mongoose` directory, Add to all configurations
 - If you're using VSCode, edit two sections in the top-level `CMakeLists.txt`:
 
 ```cmake
