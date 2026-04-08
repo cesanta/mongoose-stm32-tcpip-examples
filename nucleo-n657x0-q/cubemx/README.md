@@ -110,15 +110,6 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 )
 ```
 
-Open `.ld` linker script file and modify the MEMORY section:
-```
-MEMORY
-{
-  ROM    (xrw)    : ORIGIN = 0x34180400,   LENGTH = 287K
-  RAM    (xrw)    : ORIGIN = 0x341C8000,   LENGTH = 224K
-}
-```
-
 ## Call Mongoose from main.c
 
 Edit `Core/Src/main.c` and update the following snippets - notice the `USER CODE BEGIN` / `USER CODE END` placeholders. At the top of the file:
